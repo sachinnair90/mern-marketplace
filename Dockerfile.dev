@@ -1,0 +1,17 @@
+FROM node:14-alpine
+
+WORKDIR /app
+
+# Install dependencies as a separate layer so they are cached
+# between source-code changes. The actual source is mounted as a
+# volume at runtime, so we only copy package.json here.
+COPY package.json ./
+RUN npm install --legacy-peer-deps
+
+# Source code is bind-mounted at runtime (see docker-compose.dev.yml).
+# node_modules stays inside the container via a named volume so it
+# never conflicts with whatever is (or isn't) on the host machine.
+
+EXPOSE 3000
+
+CMD ["npm", "run", "development"]

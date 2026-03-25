@@ -1,0 +1,44 @@
+services:
+  mongodb:
+    image: mongo:4.4
+    container_name: mern-marketplace-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  mongo-seed:
+    build: .
+    container_name: mern-marketplace-seed
+    command: node scripts/seed.js
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - MONGO_HOST=mongodb://mongodb:27017/mernproject
+    restart: "no"
+
+  app:
+    build: .
+    container_name: mern-marketplace-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      mongo-seed:
+        condition: service_completed_successfully
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/mernproject
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

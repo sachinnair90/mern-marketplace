@@ -1,0 +1,35 @@
+{
+  "name": "MERN Marketplace",
+
+  // Reuse the dev compose stack — VS Code attaches to the 'app' service.
+  // mongodb and mongo-seed start automatically alongside it.
+  "dockerComposeFile": ["../docker-compose.dev.yml"],
+  "service": "app",
+  "workspaceFolder": "/app",
+
+  // Expose the app and MongoDB ports to the host
+  "forwardPorts": [3000, 27017],
+  "portsAttributes": {
+    "3000": { "label": "App", "onAutoForward": "openBrowser" },
+    "27017": { "label": "MongoDB" }
+  },
+
+  // Start the dev server once VS Code has finished setting up the container.
+  // Output is visible in the VS Code terminal panel under "Dev Container".
+  "postStartCommand": "./node_modules/.bin/nodemon",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "mongodb.mongodb-vscode",
+        "foxundermoon.shell-format"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  }
+}

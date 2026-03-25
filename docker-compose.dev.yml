@@ -1,0 +1,58 @@
+services:
+  mongodb:
+    image: mongo:4.4
+    container_name: mern-marketplace-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  mongo-seed:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: mern-marketplace-seed
+    command: node scripts/seed.js
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - MONGO_HOST=mongodb://mongodb:27017/mernproject
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: mern-marketplace-dev
+    # Run nodemon directly — avoids the NODE_OPTIONS=--openssl-legacy-provider
+    # prefix in the npm script, which is only needed on Node 17+ (not Node 14).
+    command: ./node_modules/.bin/nodemon
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app                         # live source code from host
+      - node_modules:/app/node_modules  # isolated from host
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      mongo-seed:
+        condition: service_completed_successfully
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/mernproject
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  node_modules:
