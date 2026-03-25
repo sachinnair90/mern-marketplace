@@ -18,7 +18,7 @@
   "homepage": "https://github.com/shamahoque/mern-marketplace",
   "main": "./dist/server.generated.js",
   "scripts": {
-    "seed": "node data/seed.js",
+    "seed": "node scripts/seed.js",
     "development": "NODE_OPTIONS=--openssl-legacy-provider nodemon",
     "build": "NODE_OPTIONS=--openssl-legacy-provider webpack --config webpack.config.client.production.js && NODE_OPTIONS=--openssl-legacy-provider webpack --mode=production --config webpack.config.server.js",
     "start": "NODE_ENV=production node ./dist/server.generated.js"
